@@ -31,56 +31,26 @@ function moveNo() {
         return;
     }
     
-    // 1. Get current screen and button dimensions
-    const btnWidth = no.offsetWidth || 80;
-    const btnHeight = no.offsetHeight || 40;
-    
-    // 2. Detect if it's a mobile screen
+    // Detect if the user is on a mobile phone screen
     const isMobile = window.innerWidth <= 480;
-    
-    // 3. Set a strict jump limit (Capped to smaller bounds on phone)
-    const maxJumpDistance = isMobile ? 120 : 400; 
-    const padding = 30; 
-    
-    // 4. Get the current position of the button
-    const rect = no.getBoundingClientRect();
-    const currentX = rect.left;
-    const currentY = rect.top;
-    
-    // 5. Generate a smaller, controlled random offset
-    let changeX = (Math.random() * maxJumpDistance * 2) - maxJumpDistance;
-    let changeY = (Math.random() * maxJumpDistance * 2) - maxJumpDistance;
-    
-    // 6. Calculate new targeted coordinates
-    let randomX = currentX + changeX;
-    let randomY = currentY + changeY;
-    
-    // 7. Hard boundaries: Keep it strictly inside the visible screen window
-    const maxX = window.innerWidth - btnWidth - padding;
-    const maxY = window.innerHeight - btnHeight - padding;
-    
-    randomX = Math.max(padding, Math.min(randomX, maxX));
-    randomY = Math.max(padding, Math.min(randomY, maxY));
-    
-    // 8. Prevent landing directly on top of the Yes button
-    const btnYes = document.getElementById('yes') || document.querySelector('[id*="yes"]');
-    if (btnYes) {
-        const yesRect = btnYes.getBoundingClientRect();
-        if (randomX > yesRect.left - 50 && randomX < yesRect.right + 50 &&
-            randomY > yesRect.top - 50 && randomY < yesRect.bottom + 50) {
-            // Shift away cleanly to an alternate side if it gets stuck near Yes
-            randomX = randomX > yesRect.left ? maxX - 20 : padding + 20;
-            randomY = randomY > yesRect.top ? maxY - 20 : padding + 20;
-        }
-    }
-    
-    // 9. Apply the safe, scaled coordinates
+
+    // Generate random screen percentages
+    // On mobile: Keep it tightly confined between 35% and 65% of the screen width
+    // On laptop: Let it roam wider between 10% and 80% of the screen width
+    let randomX = isMobile 
+        ? Math.floor(Math.random() * 30) + 35 
+        : Math.floor(Math.random() * 70) + 10;
+        
+    // Keep the vertical jump in a nice centered zone (40% to 75% height)
+    let randomY = Math.floor(Math.random() * 35) + 40;
+
+    // Apply the coordinates as percentage units so it scales to the device instantly
     no.style.position = 'fixed';
-    no.style.left = randomX + 'px';
-    no.style.top = randomY + 'px';
+    no.style.left = randomX + 'vw';
+    no.style.top = randomY + 'vh';
 }
 
-// Keep your exact event listeners underneath
+// Keep your exact event listeners working below
 no.addEventListener("pointerdown", (e) => { if (!unlocked) { e.preventDefault(); moveNo(); } });
 no.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") moveNo(); });
 function celebrate(){show('pageYes');for(let i=0;i<100;i++){const c=document.createElement('i');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=['#f27c9d','#ffd66e','#b8a7f0','#ffabc2','#fff'][i%5];c.style.animationDelay=Math.random()*.9+'s';document.body.append(c);setTimeout(()=>c.remove(),3600)}for(let i=0;i<26;i++){const h=document.createElement('span');h.className='burst';h.textContent=['♥','♡','✨'][i%3];h.style.left='50%';h.style.top='48%';h.style.setProperty('--x',(Math.random()*440-220)+'px');h.style.setProperty('--y',(Math.random()*440-220)+'px');document.body.append(h);setTimeout(()=>h.remove(),900)}}
