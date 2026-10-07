@@ -22,7 +22,7 @@ document.querySelectorAll('.name').forEach(el=>{if(HER_NAME!=='your favorite per
 const pages=[...document.querySelectorAll('.page')];function show(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));window.scrollTo({top:0,behavior:'smooth'})}
 document.getElementById('ask').addEventListener('click',()=>{document.getElementById('question').classList.add('show');document.getElementById('ask').style.display='none'});
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
-function moveNo() {
+    function moveNo() {
     if (unlocked) return;
     tries++;
     if (tries >= 7) {
@@ -31,26 +31,38 @@ function moveNo() {
         return;
     }
     
-    // Detect if the user is on a mobile phone screen
-    const isMobile = window.innerWidth <= 480;
-
-    // Generate random screen percentages
-    // On mobile: Keep it tightly confined between 35% and 65% of the screen width
-    // On laptop: Let it roam wider between 10% and 80% of the screen width
-    let randomX = isMobile 
-        ? Math.floor(Math.random() * 30) + 35 
-        : Math.floor(Math.random() * 70) + 10;
-        
-    // Keep the vertical jump in a nice centered zone (40% to 75% height)
-    let randomY = Math.floor(Math.random() * 35) + 40;
-
-    // Apply the coordinates as percentage units so it scales to the device instantly
+    // 1. Get the screen size and button size
+    const btnWidth = no.offsetWidth || 80;
+    const btnHeight = no.offsetHeight || 40;
+    const padding = 40; // Keeps it away from the absolute edges
+    
+    // 2. Calculate safe boundary limits
+    const maxX = window.innerWidth - btnWidth - padding;
+    const maxY = window.innerHeight - btnHeight - padding;
+    
+    // 3. Generate random safe coordinates
+    let randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+    let randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+    
+    // 4. Prevent landing behind or directly on the Yes button
+    const btnYes = document.getElementById('yes') || document.querySelector('[id*="yes"]');
+    if (btnYes) {
+        const yesRect = btnYes.getBoundingClientRect();
+        if (randomX > yesRect.left - 60 && randomX < yesRect.right + 60 &&
+            randomY > yesRect.top - 60 && randomY < yesRect.bottom + 60) {
+            // Shift it to a completely different corner if it risks overlapping
+            randomX = padding;
+            randomY = padding;
+        }
+    }
+    
+    // 5. Apply the safe positions smoothly
     no.style.position = 'fixed';
-    no.style.left = randomX + 'vw';
-    no.style.top = randomY + 'vh';
+    no.style.left = randomX + 'px';
+    no.style.top = randomY + 'px';
 }
 
-// Keep your exact event listeners working below
+// Keep your exact event listeners working flawlessly
 no.addEventListener("pointerdown", (e) => { if (!unlocked) { e.preventDefault(); moveNo(); } });
 no.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") moveNo(); });
 function celebrate(){show('pageYes');for(let i=0;i<100;i++){const c=document.createElement('i');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=['#f27c9d','#ffd66e','#b8a7f0','#ffabc2','#fff'][i%5];c.style.animationDelay=Math.random()*.9+'s';document.body.append(c);setTimeout(()=>c.remove(),3600)}for(let i=0;i<26;i++){const h=document.createElement('span');h.className='burst';h.textContent=['♥','♡','✨'][i%3];h.style.left='50%';h.style.top='48%';h.style.setProperty('--x',(Math.random()*440-220)+'px');h.style.setProperty('--y',(Math.random()*440-220)+'px');document.body.append(h);setTimeout(()=>h.remove(),900)}}
